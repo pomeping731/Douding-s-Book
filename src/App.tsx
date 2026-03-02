@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Moon, Stars, ChevronRight, ChevronLeft, Volume2, VolumeX, Wand2, Loader2 } from 'lucide-react';
+import { Heart, Moon, Stars, ChevronRight, ChevronLeft, Volume2, VolumeX, Wand2, Loader2, Edit3, Save, Upload, Check } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 const INITIAL_STORY = [
@@ -77,8 +77,105 @@ const INITIAL_STORY = [
 export default function App() {
   const [story, setStory] = useState(INITIAL_STORY);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [direction, setDirection] = useState(0); // -1 for prev, 1 for next
+  const [isMuted, setIsMuted] = useState(true); // Default to muted/off
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+
+  useEffect(() => {
+    synthRef.current = window.speechSynthesis;
+    return () => {
+      synthRef.current?.cancel();
+    };
+  }, []);
+
+  const speak = (text: string) => {
+    if (!synthRef.current) return;
+    synthRef.current.cancel(); // Stop any current speech
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US'; // The story is in English
+    utterance.rate = 0.9; // Slightly slower for a 1-year-old
+    utterance.pitch = 1.1; // Slightly higher/friendlier pitch
+    
+    synthRef.current.speak(utterance);
+  };
+
+  // Automatically read when page changes if not muted
+  useEffect(() => {
+    if (!isMuted && !isEditing) {
+      speak(story[currentPage].text);
+    }
+  }, [currentPage, isMuted, isEditing]);
+
+  const toggleSound = () => {
+    if (!isMuted) {
+      synthRef.current?.cancel();
+    } else {
+      speak(story[currentPage].text);
+    }
+    setIsMuted(!isMuted);
+  };
+
+  // Load saved story from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('douding_story');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const merged = INITIAL_STORY.map((page, idx) => ({
+          ...page,
+          text: parsed[idx]?.text || page.text,
+          image: parsed[idx]?.image || page.image,
+        }));
+        setStory(merged);
+      } catch (e) {
+        console.error("Failed to load saved story", e);
+      }
+    }
+  }, []);
+
+  const saveToLocalStorage = (newStory: typeof INITIAL_STORY) => {
+    const serializable = newStory.map(p => ({ text: p.text, image: p.image }));
+    localStorage.setItem('douding_story', JSON.stringify(serializable));
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
+  const handleTextChange = (newText: string) => {
+    const newStory = [...story];
+    newStory[currentPage].text = newText;
+    setStory(newStory);
+  };
+
+  const handleImageClick = () => {
+    if (isEditing) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newStory = [...story];
+        newStory[currentPage].image = reader.result as string;
+        setStory(newStory);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleEditMode = () => {
+    if (isEditing) {
+      saveToLocalStorage(story);
+    }
+    setIsEditing(!isEditing);
+  };
 
   const generateNewStory = async () => {
     setIsGenerating(true);
@@ -117,6 +214,7 @@ export default function App() {
 
         setStory(newStory);
         setCurrentPage(0);
+        saveToLocalStorage(newStory);
       }
     } catch (error) {
       console.error("Failed to generate story:", error);
@@ -127,12 +225,14 @@ export default function App() {
 
   const nextPage = () => {
     if (currentPage < story.length - 1) {
+      setDirection(1);
       setCurrentPage(currentPage + 1);
     }
   };
 
   const prevPage = () => {
     if (currentPage > 0) {
+      setDirection(-1);
       setCurrentPage(currentPage - 1);
     }
   };
@@ -141,6 +241,14 @@ export default function App() {
 
   return (
     <div className={`fixed inset-0 transition-colors duration-1000 ${page.bgColor} flex flex-col items-center justify-center p-4 md:p-8`}>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        accept="image/*" 
+        onChange={handleFileChange} 
+      />
+
       {/* Background Decorative Elements */}
       <div className="absolute top-10 left-10 opacity-20 animate-pulse">
         <Stars size={100} />
@@ -155,20 +263,41 @@ export default function App() {
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
             <Heart className="text-pink-500" size={20} />
           </div>
-          <span className="font-serif text-lg font-medium">豆丁的美梦</span>
+          <span className="font-serif text-lg font-medium">豆丁的和平花园</span>
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={generateNewStory}
-            disabled={isGenerating}
-            className="p-3 rounded-full bg-white/50 hover:bg-white transition-colors flex items-center gap-2"
-            title="生成新故事"
+            onClick={toggleEditMode}
+            className={`p-3 rounded-full transition-all flex items-center gap-2 ${
+              isEditing ? 'bg-green-500 text-white shadow-lg' : 'bg-white/50 hover:bg-white'
+            }`}
+            title={isEditing ? "保存修改" : "编辑绘本"}
           >
-            {isGenerating ? <Loader2 className="animate-spin" size={24} /> : <Wand2 size={24} />}
+            {isEditing ? (
+              saveStatus === 'saved' ? <Check size={24} /> : <Save size={24} />
+            ) : (
+              <Edit3 size={24} />
+            )}
+            {isEditing && <span className="text-sm font-medium pr-1">{saveStatus === 'saved' ? '已保存' : '完成'}</span>}
           </button>
+          
+          {!isEditing && (
+            <button 
+              onClick={generateNewStory}
+              disabled={isGenerating}
+              className="p-3 rounded-full bg-white/50 hover:bg-white transition-colors flex items-center gap-2"
+              title="AI 创作新故事"
+            >
+              {isGenerating ? <Loader2 className="animate-spin" size={24} /> : <Wand2 size={24} />}
+            </button>
+          )}
+
           <button 
-            onClick={() => setIsMuted(!isMuted)}
-            className="p-3 rounded-full bg-white/50 hover:bg-white transition-colors"
+            onClick={toggleSound}
+            className={`p-3 rounded-full transition-colors ${
+              !isMuted ? 'bg-pink-100 text-pink-600 shadow-inner' : 'bg-white/50 hover:bg-white'
+            }`}
+            title={isMuted ? "开启朗读" : "关闭朗读"}
           >
             {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
           </button>
@@ -176,40 +305,87 @@ export default function App() {
       </div>
 
       {/* Story Container */}
-      <div className="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/9] flex flex-col md:flex-row items-center gap-8 z-0">
-        <AnimatePresence mode="wait">
+      <div className="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/9] flex flex-col md:flex-row items-center gap-8 z-0" style={{ perspective: "1200px" }}>
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={`${story[0].text.substring(0, 5)}-${currentPage}`}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            custom={direction}
+            initial={{ 
+              opacity: 0, 
+              rotateY: direction > 0 ? 45 : -45,
+              x: direction > 0 ? 100 : -100,
+              scale: 0.9
+            }}
+            animate={{ 
+              opacity: 1, 
+              rotateY: 0,
+              x: 0,
+              scale: 1
+            }}
+            exit={{ 
+              opacity: 0, 
+              rotateY: direction > 0 ? -45 : 45,
+              x: direction > 0 ? -100 : 100,
+              scale: 0.9
+            }}
+            transition={{ 
+              duration: 0.7, 
+              ease: [0.23, 1, 0.32, 1] 
+            }}
+            style={{ transformOrigin: direction > 0 ? "right center" : "left center" }}
             className="flex flex-col md:flex-row items-center gap-8 w-full"
           >
             {/* Image Section */}
-            <div className="w-full md:w-1/2 h-full relative group">
+            <div 
+              className={`w-full md:w-1/2 h-full relative group ${isEditing ? 'cursor-pointer' : ''}`}
+              onClick={handleImageClick}
+            >
               <div className="absolute inset-0 bg-white/20 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
               <img
                 src={page.image}
                 alt="Story Illustration"
-                className="w-full h-full object-cover rounded-3xl shadow-2xl relative z-10 border-4 border-white"
+                className={`w-full h-full object-cover rounded-3xl shadow-2xl relative z-10 border-4 border-white transition-all ${
+                  isEditing ? 'brightness-75 group-hover:brightness-90' : ''
+                }`}
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute -bottom-4 -right-4 z-20 bg-white p-4 rounded-2xl shadow-lg">
-                {page.icon}
-              </div>
+              {isEditing && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="bg-black/50 text-white p-4 rounded-full backdrop-blur-sm flex flex-col items-center gap-2">
+                    <Upload size={32} />
+                    <span className="text-xs font-bold uppercase tracking-wider">更换图片</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Text Section */}
             <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left">
-              <motion.p 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="story-text text-[#5d4037]"
-              >
-                {page.text}
-              </motion.p>
+              {isEditing ? (
+                <motion.textarea
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  value={page.text}
+                  onChange={(e) => handleTextChange(e.target.value)}
+                  className="story-text text-[#5d4037] bg-white/30 p-4 rounded-2xl border-2 border-dashed border-[#5d4037]/30 focus:outline-none focus:border-[#5d4037] w-full min-h-[150px] resize-none"
+                  autoFocus
+                />
+              ) : (
+                <motion.p 
+                  key={page.text}
+                  initial={{ y: 15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: 0.4,
+                    ease: [0.21, 0.47, 0.32, 0.98] 
+                  }}
+                  className="story-text text-[#5d4037]"
+                >
+                  {page.text}
+                </motion.p>
+              )}
               
               <div className="mt-12 flex justify-center md:justify-start gap-4">
                 <button
