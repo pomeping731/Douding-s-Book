@@ -15,5 +15,5 @@ body {
 }
 
 .story-text {
-  @apply text-2xl md:text-3xl leading-relaxed font-serif;
+  @apply text-xl md:text-3xl leading-relaxed font-serif;
 }

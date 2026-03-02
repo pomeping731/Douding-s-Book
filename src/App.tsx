@@ -5,72 +5,156 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Moon, Stars, ChevronRight, ChevronLeft, Volume2, VolumeX, Wand2, Loader2, Edit3, Save, Upload, Check } from 'lucide-react';
+import { Heart, Moon, Stars, ChevronRight, ChevronLeft, Volume2, VolumeX, Wand2, Loader2, Edit3, Save, Upload, Check, Sparkles } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
+const BirthdayCake = ({ isBlownOut, onBlowOut }: { isBlownOut: boolean, onBlowOut: () => void }) => {
+  return (
+    <div className="relative flex flex-col items-center justify-center scale-75 md:scale-90">
+      {/* Candles */}
+      <div className="flex gap-4 mb-[-10px] z-20">
+        {[1].map((i) => (
+          <div key={i} className="relative flex flex-col items-center">
+            <AnimatePresence>
+              {!isBlownOut && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [1, 1.2, 1], y: [0, -2, 0] }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ repeat: Infinity, duration: 0.6 }}
+                  className="w-4 h-6 bg-orange-400 rounded-full blur-[2px] absolute -top-6 shadow-[0_0_15px_rgba(251,146,60,0.8)]"
+                />
+              )}
+            </AnimatePresence>
+            <div className="w-3 h-12 bg-pink-200 rounded-t-sm border-b-2 border-pink-300" />
+          </div>
+        ))}
+      </div>
+
+      {/* Cake Layers */}
+      <div className="w-40 h-16 bg-white rounded-t-xl shadow-inner border-x-2 border-t-2 border-pink-100 relative overflow-hidden">
+        <div className="absolute top-2 left-0 w-full h-4 bg-pink-50 opacity-50" />
+        <div className="absolute bottom-0 left-0 w-full h-2 bg-pink-200" />
+      </div>
+      <div className="w-48 h-20 bg-pink-100 rounded-t-lg shadow-md border-x-2 border-t-2 border-pink-200 relative">
+        <div className="absolute top-4 left-4 flex gap-2">
+          <Heart size={12} className="text-white opacity-60" />
+          <Heart size={12} className="text-white opacity-60" />
+        </div>
+        <div className="absolute bottom-0 left-0 w-full h-3 bg-pink-300 opacity-30" />
+      </div>
+
+      {/* Plate */}
+      <div className="w-56 h-4 bg-white rounded-full shadow-lg border-b-4 border-gray-100" />
+
+      {!isBlownOut ? (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onBlowOut}
+          className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-full font-serif text-sm shadow-lg flex items-center gap-2 z-30"
+        >
+          <Sparkles size={16} />
+          Make a Wish & Blow!
+        </motion.button>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 text-pink-600 font-serif text-base font-bold flex flex-col items-center gap-1"
+        >
+          <div className="flex gap-2">
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>🎂</motion.div>
+            <span>Wish Granted!</span>
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>✨</motion.div>
+          </div>
+          <p className="text-[10px] font-normal text-pink-400">Time to read your story...</p>
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
+const StoryIcon = ({ name, colorClass }: { name: string, colorClass: string }) => {
+  const props = { className: colorClass, size: 48 };
+  if (name === 'stars') return <Stars {...props} />;
+  if (name === 'moon') return <Moon {...props} />;
+  return <Heart {...props} />;
+};
+
 const INITIAL_STORY = [
+  {
+    id: 0,
+    type: 'birthday',
+    text: "Happy 1st Birthday to Ms. Douding! 祝豆丁女士1岁生日快乐！",
+    image: "https://picsum.photos/seed/birthday_cake/800/600",
+    bgColor: "bg-rose-50",
+    iconName: "heart",
+    iconColor: "text-rose-400",
+  },
   {
     id: 1,
     text: "Far, far away, there is a sparkling Peace Garden. Chubby bears, hopping bunnies, and singing birds all live here together.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_0.png",
     bgColor: "bg-emerald-50",
-    icon: <Heart className="text-emerald-400" size={48} />,
+    iconName: "heart",
+    iconColor: "text-emerald-400",
   },
   {
     id: 2,
     text: "One morning, a little star slid down the rainbow slide. 'Waa!' She landed in the flowers and became a sweet baby named Douding.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_1.png",
     bgColor: "bg-yellow-50",
-    icon: <Stars className="text-yellow-400" size={48} />,
+    iconName: "stars",
+    iconColor: "text-yellow-400",
   },
   {
     id: 3,
     text: "Bunny and Squirrel were fighting over a pinecone. They were very grumpy! Douding crawled over and gave them a big, warm hug.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_2.png",
     bgColor: "bg-orange-50",
-    icon: <Heart className="text-orange-400" size={48} />,
+    iconName: "heart",
+    iconColor: "text-orange-400",
   },
   {
     id: 4,
     text: "'Hug, no fight,' Douding whispered. Bunny and Squirrel smiled and shared the pinecone together.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_3.png",
     bgColor: "bg-blue-50",
-    icon: <Heart className="text-blue-400" size={48} />,
+    iconName: "heart",
+    iconColor: "text-blue-400",
   },
   {
     id: 5,
     text: "A little bird brought a shiny seed from the sky. Douding planted it in the soft dirt and gave it a little water.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_4.png",
     bgColor: "bg-sky-50",
-    icon: <Stars className="text-sky-400" size={48} />,
+    iconName: "stars",
+    iconColor: "text-sky-400",
   },
   {
     id: 6,
     text: "Soon, a beautiful rainbow flower grew! Its petals glowed with gentle light, making the whole garden happy.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_5.png",
     bgColor: "bg-pink-50",
-    icon: <Heart className="text-pink-400" size={48} />,
+    iconName: "heart",
+    iconColor: "text-pink-400",
   },
   {
     id: 7,
     text: "Now, everyone in the Peace Garden is the best of friends. They hug, share, and sing songs every single day.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_6.png",
     bgColor: "bg-green-50",
-    icon: <Heart className="text-green-400" size={48} />,
+    iconName: "heart",
+    iconColor: "text-green-400",
   },
   {
     id: 8,
     text: "At night, Grandma Moon tucked Douding in with a soft cloud blanket. 'Goodnight, Douding. Goodnight, Peace.'",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_7.png",
     bgColor: "bg-indigo-50",
-    icon: <Moon className="text-indigo-400" size={48} />,
-  },
-  {
-    id: 9,
-    text: "Dear Douding, May your world always be filled with love and peace.",
-    image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_8.png",
-    bgColor: "bg-rose-50",
-    icon: <Heart className="text-rose-400" size={48} />,
+    iconName: "moon",
+    iconColor: "text-indigo-400",
   },
 ];
 
@@ -81,6 +165,7 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(true); // Default to muted/off
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isBlownOut, setIsBlownOut] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -126,21 +211,17 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const merged = INITIAL_STORY.map((page, idx) => ({
-          ...page,
-          text: parsed[idx]?.text || page.text,
-          image: parsed[idx]?.image || page.image,
-        }));
-        setStory(merged);
+        if (Array.isArray(parsed)) {
+          setStory(parsed);
+        }
       } catch (e) {
         console.error("Failed to load saved story", e);
       }
     }
   }, []);
 
-  const saveToLocalStorage = (newStory: typeof INITIAL_STORY) => {
-    const serializable = newStory.map(p => ({ text: p.text, image: p.image }));
-    localStorage.setItem('douding_story', JSON.stringify(serializable));
+  const saveToLocalStorage = (newStory: any[]) => {
+    localStorage.setItem('douding_story', JSON.stringify(newStory));
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus('idle'), 2000);
   };
@@ -192,24 +273,16 @@ export default function App() {
       const sentences = JSON.parse(response.text || "[]");
       if (Array.isArray(sentences) && sentences.length >= 9) {
         const bgColors = ["bg-emerald-50", "bg-yellow-50", "bg-orange-50", "bg-blue-50", "bg-sky-50", "bg-pink-50", "bg-green-50", "bg-indigo-50", "bg-rose-50"];
-        const icons = [
-          <Heart className="text-emerald-400" size={48} />,
-          <Stars className="text-yellow-400" size={48} />,
-          <Heart className="text-orange-400" size={48} />,
-          <Heart className="text-blue-400" size={48} />,
-          <Stars className="text-sky-400" size={48} />,
-          <Heart className="text-pink-400" size={48} />,
-          <Heart className="text-green-400" size={48} />,
-          <Moon className="text-indigo-400" size={48} />,
-          <Heart className="text-rose-400" size={48} />,
-        ];
+        const iconNames = ["heart", "stars", "heart", "heart", "stars", "heart", "heart", "moon", "heart"];
+        const iconColors = ["text-emerald-400", "text-yellow-400", "text-orange-400", "text-blue-400", "text-sky-400", "text-pink-400", "text-green-400", "text-indigo-400", "text-rose-400"];
 
         const newStory = sentences.slice(0, 9).map((text, index) => ({
           id: index + 1,
           text,
           image: `https://picsum.photos/seed/peace_garden_gen_${index}_${Date.now()}/800/600`,
           bgColor: bgColors[index],
-          icon: icons[index],
+          iconName: iconNames[index],
+          iconColor: iconColors[index],
         }));
 
         setStory(newStory);
@@ -240,7 +313,7 @@ export default function App() {
   const page = story[currentPage];
 
   return (
-    <div className={`fixed inset-0 transition-colors duration-1000 ${page.bgColor} flex flex-col items-center justify-center p-4 md:p-8`}>
+    <div className={`fixed inset-0 transition-colors duration-1000 ${page.bgColor} flex flex-col items-center justify-start md:justify-center p-4 md:p-8 pt-24 md:pt-8 overflow-y-auto md:overflow-hidden`}>
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -249,21 +322,13 @@ export default function App() {
         onChange={handleFileChange} 
       />
 
-      {/* Background Decorative Elements */}
-      <div className="absolute top-10 left-10 opacity-20 animate-pulse">
-        <Stars size={100} />
-      </div>
-      <div className="absolute bottom-10 right-10 opacity-20 animate-bounce">
-        <Heart size={120} />
-      </div>
-
       {/* Top Bar */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-50 bg-gradient-to-b from-white/40 to-transparent backdrop-blur-[2px] md:bg-none md:backdrop-blur-none">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
             <Heart className="text-pink-500" size={20} />
           </div>
-          <span className="font-serif text-lg font-medium">豆丁的和平花园</span>
+          <span className="font-serif text-lg font-medium hidden sm:inline">豆丁的和平花园</span>
         </div>
         <div className="flex gap-2">
           <button 
@@ -305,7 +370,7 @@ export default function App() {
       </div>
 
       {/* Story Container */}
-      <div className="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/9] flex flex-col md:flex-row items-center gap-8 z-0" style={{ perspective: "1200px" }}>
+      <div className="relative w-full max-w-5xl flex flex-col items-center justify-center z-0" style={{ perspective: "1200px" }}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={`${story[0].text.substring(0, 5)}-${currentPage}`}
@@ -333,87 +398,119 @@ export default function App() {
               ease: [0.23, 1, 0.32, 1] 
             }}
             style={{ transformOrigin: direction > 0 ? "right center" : "left center" }}
-            className="flex flex-col md:flex-row items-center gap-8 w-full"
+            className="w-full"
           >
-            {/* Image Section */}
-            <div 
-              className={`w-full md:w-1/2 h-full relative group ${isEditing ? 'cursor-pointer' : ''}`}
-              onClick={handleImageClick}
-            >
-              <div className="absolute inset-0 bg-white/20 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
-              <img
-                src={page.image}
-                alt="Story Illustration"
-                className={`w-full h-full object-cover rounded-3xl shadow-2xl relative z-10 border-4 border-white transition-all ${
-                  isEditing ? 'brightness-75 group-hover:brightness-90' : ''
-                }`}
-                referrerPolicy="no-referrer"
-              />
-              {isEditing && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="bg-black/50 text-white p-4 rounded-full backdrop-blur-sm flex flex-col items-center gap-2">
-                    <Upload size={32} />
-                    <span className="text-xs font-bold uppercase tracking-wider">更换图片</span>
+            {page.type === 'birthday' ? (
+              <div className="flex flex-col items-center justify-center text-center gap-4 py-4 mt-4 md:mt-0">
+                <BirthdayCake isBlownOut={isBlownOut} onBlowOut={() => setIsBlownOut(true)} />
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <h1 className="text-xl md:text-2xl font-serif font-bold text-pink-600 mb-1">
+                    祝豆丁女士1岁生日快乐！
+                  </h1>
+                  <p className="text-base md:text-lg font-serif text-pink-400">
+                    Happy 1st Birthday to Ms. Douding!
+                  </p>
+                </motion.div>
+                
+                <div className="flex justify-center gap-4 mt-2">
+                  <button
+                    onClick={nextPage}
+                    className="px-5 py-1.5 bg-white hover:bg-pink-50 text-pink-600 rounded-full shadow-md font-serif font-medium transition-all flex items-center gap-2 text-xs md:text-sm"
+                  >
+                    开始阅读故事 <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 w-full mt-4 md:mt-0">
+                {/* Image Section */}
+                <div 
+                  className={`w-full md:w-1/2 aspect-[4/3] relative group flex items-center justify-center ${isEditing ? 'cursor-pointer' : ''}`}
+                  onClick={handleImageClick}
+                >
+                  <div className="absolute inset-0 bg-white/20 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
+                  <img
+                    src={page.image}
+                    alt="Story Illustration"
+                    className={`w-full h-full object-cover rounded-3xl shadow-2xl relative z-10 border-4 border-white transition-all ${
+                      isEditing ? 'brightness-75 group-hover:brightness-90' : ''
+                    }`}
+                    referrerPolicy="no-referrer"
+                  />
+                  {isEditing && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-black/50 text-white p-4 rounded-full backdrop-blur-sm flex flex-col items-center gap-2">
+                        <Upload size={32} />
+                        <span className="text-xs font-bold uppercase tracking-wider">更换图片</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Text Section */}
+                <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left">
+                  <div className="flex justify-center md:justify-start mb-6">
+                    <StoryIcon name={page.iconName} colorClass={page.iconColor} />
+                  </div>
+                  {isEditing ? (
+                    <motion.textarea
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      value={page.text}
+                      onChange={(e) => handleTextChange(e.target.value)}
+                      className="story-text text-[#5d4037] bg-white/30 p-4 rounded-2xl border-2 border-dashed border-[#5d4037]/30 focus:outline-none focus:border-[#5d4037] w-full min-h-[150px] resize-none"
+                      autoFocus
+                    />
+                  ) : (
+                    <motion.p 
+                      key={page.text}
+                      initial={{ y: 15, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ 
+                        duration: 0.8, 
+                        delay: 0.4,
+                        ease: [0.21, 0.47, 0.32, 0.98] 
+                      }}
+                      className="story-text text-[#5d4037]"
+                    >
+                      {page.text}
+                    </motion.p>
+                  )}
+                  
+                  <div className="mt-12 flex justify-center md:justify-start gap-4">
+                    <button
+                      onClick={prevPage}
+                      disabled={currentPage === 0}
+                      className={`p-4 rounded-full transition-all ${
+                        currentPage === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-white hover:scale-110 shadow-md'
+                      }`}
+                    >
+                      <ChevronLeft size={32} />
+                    </button>
+                    <button
+                      onClick={nextPage}
+                      disabled={currentPage === story.length - 1}
+                      className={`p-4 rounded-full transition-all ${
+                        currentPage === story.length - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-white hover:scale-110 shadow-md'
+                      }`}
+                    >
+                      <ChevronRight size={32} />
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Text Section */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left">
-              {isEditing ? (
-                <motion.textarea
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  value={page.text}
-                  onChange={(e) => handleTextChange(e.target.value)}
-                  className="story-text text-[#5d4037] bg-white/30 p-4 rounded-2xl border-2 border-dashed border-[#5d4037]/30 focus:outline-none focus:border-[#5d4037] w-full min-h-[150px] resize-none"
-                  autoFocus
-                />
-              ) : (
-                <motion.p 
-                  key={page.text}
-                  initial={{ y: 15, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ 
-                    duration: 0.8, 
-                    delay: 0.4,
-                    ease: [0.21, 0.47, 0.32, 0.98] 
-                  }}
-                  className="story-text text-[#5d4037]"
-                >
-                  {page.text}
-                </motion.p>
-              )}
-              
-              <div className="mt-12 flex justify-center md:justify-start gap-4">
-                <button
-                  onClick={prevPage}
-                  disabled={currentPage === 0}
-                  className={`p-4 rounded-full transition-all ${
-                    currentPage === 0 ? 'opacity-30 cursor-not-allowed' : 'bg-white hover:scale-110 shadow-md'
-                  }`}
-                >
-                  <ChevronLeft size={32} />
-                </button>
-                <button
-                  onClick={nextPage}
-                  disabled={currentPage === story.length - 1}
-                  className={`p-4 rounded-full transition-all ${
-                    currentPage === story.length - 1 ? 'opacity-30 cursor-not-allowed' : 'bg-white hover:scale-110 shadow-md'
-                  }`}
-                >
-                  <ChevronRight size={32} />
-                </button>
               </div>
-            </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Progress Indicator */}
-      <div className="absolute bottom-10 flex gap-2">
+      <div className="fixed bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-50">
         {story.map((_, idx) => (
           <div
             key={idx}
@@ -424,26 +521,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* Interactive Floating Bubbles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: "110%", x: `${Math.random() * 100}%` }}
-            animate={{ 
-              y: "-10%",
-              x: `${(Math.random() * 100) + (Math.sin(i) * 10)}%`
-            }}
-            transition={{ 
-              duration: 10 + Math.random() * 10, 
-              repeat: Infinity,
-              ease: "linear",
-              delay: i * 2
-            }}
-            className="absolute w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
-          />
-        ))}
-      </div>
     </div>
   );
 }
