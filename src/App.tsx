@@ -10,7 +10,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const BirthdayCake = ({ isBlownOut, onBlowOut }: { isBlownOut: boolean, onBlowOut: () => void }) => {
   return (
-    <div className="relative flex flex-col items-center justify-center scale-75 md:scale-90">
+    <div className="relative flex flex-col items-center justify-center scale-90 md:scale-110">
       {/* Candles */}
       <div className="flex gap-4 mb-[-10px] z-20">
         {[1].map((i) => (
@@ -52,34 +52,26 @@ const BirthdayCake = ({ isBlownOut, onBlowOut }: { isBlownOut: boolean, onBlowOu
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onBlowOut}
-          className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-full font-serif text-sm shadow-lg flex items-center gap-2 z-30"
+          className="mt-6 px-6 py-2 bg-pink-500 text-white rounded-full font-serif text-sm shadow-lg flex items-center gap-2 z-30 hover:bg-pink-600 transition-colors"
         >
           <Sparkles size={16} />
-          Make a Wish & Blow!
+          许个愿，吹灭蜡烛！
         </motion.button>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 text-pink-600 font-serif text-base font-bold flex flex-col items-center gap-1"
+          className="mt-6 text-pink-600 font-serif text-base font-bold flex flex-col items-center gap-1"
         >
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>🎂</motion.div>
-            <span>Wish Granted!</span>
+            <span>愿望成真！</span>
             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity }}>✨</motion.div>
           </div>
-          <p className="text-[10px] font-normal text-pink-400">Time to read your story...</p>
         </motion.div>
       )}
     </div>
   );
-};
-
-const StoryIcon = ({ name, colorClass }: { name: string, colorClass: string }) => {
-  const props = { className: colorClass, size: 48 };
-  if (name === 'stars') return <Stars {...props} />;
-  if (name === 'moon') return <Moon {...props} />;
-  return <Heart {...props} />;
 };
 
 const INITIAL_STORY = [
@@ -89,72 +81,70 @@ const INITIAL_STORY = [
     text: "Happy 1st Birthday to Ms. Douding! 祝豆丁女士1岁生日快乐！",
     image: "https://picsum.photos/seed/birthday_cake/800/600",
     bgColor: "bg-rose-50",
-    iconName: "heart",
-    iconColor: "text-rose-400",
+    icon: <Heart className="text-rose-400" size={48} />,
   },
   {
     id: 1,
     text: "Far, far away, there is a sparkling Peace Garden. Chubby bears, hopping bunnies, and singing birds all live here together.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_0.png",
     bgColor: "bg-emerald-50",
-    iconName: "heart",
-    iconColor: "text-emerald-400",
+    icon: <Heart className="text-emerald-400" size={48} />,
   },
   {
     id: 2,
     text: "One morning, a little star slid down the rainbow slide. 'Waa!' She landed in the flowers and became a sweet baby named Douding.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_1.png",
     bgColor: "bg-yellow-50",
-    iconName: "stars",
-    iconColor: "text-yellow-400",
+    icon: <Stars className="text-yellow-400" size={48} />,
   },
   {
     id: 3,
     text: "Bunny and Squirrel were fighting over a pinecone. They were very grumpy! Douding crawled over and gave them a big, warm hug.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_2.png",
     bgColor: "bg-orange-50",
-    iconName: "heart",
-    iconColor: "text-orange-400",
+    icon: <Heart className="text-orange-400" size={48} />,
   },
   {
     id: 4,
     text: "'Hug, no fight,' Douding whispered. Bunny and Squirrel smiled and shared the pinecone together.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_3.png",
     bgColor: "bg-blue-50",
-    iconName: "heart",
-    iconColor: "text-blue-400",
+    icon: <Heart className="text-blue-400" size={48} />,
   },
   {
     id: 5,
     text: "A little bird brought a shiny seed from the sky. Douding planted it in the soft dirt and gave it a little water.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_4.png",
     bgColor: "bg-sky-50",
-    iconName: "stars",
-    iconColor: "text-sky-400",
+    icon: <Stars className="text-sky-400" size={48} />,
   },
   {
     id: 6,
     text: "Soon, a beautiful rainbow flower grew! Its petals glowed with gentle light, making the whole garden happy.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_5.png",
     bgColor: "bg-pink-50",
-    iconName: "heart",
-    iconColor: "text-pink-400",
+    icon: <Heart className="text-pink-400" size={48} />,
   },
   {
     id: 7,
     text: "Now, everyone in the Peace Garden is the best of friends. They hug, share, and sing songs every single day.",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_6.png",
     bgColor: "bg-green-50",
-    iconName: "heart",
-    iconColor: "text-green-400",
+    icon: <Heart className="text-green-400" size={48} />,
   },
   {
     id: 8,
     text: "At night, Grandma Moon tucked Douding in with a soft cloud blanket. 'Goodnight, Douding. Goodnight, Peace.'",
     image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_7.png",
     bgColor: "bg-indigo-50",
-    iconName: "moon",
-    iconColor: "text-indigo-400",
+    icon: <Moon className="text-indigo-400" size={48} />,
+  },
+  {
+    id: 9,
+    text: "Dear Douding, May your world always be filled with love and peace.",
+    image: "https://ais-pre-nybeqpxmgshpqyyyotocib-95992970969.us-west2.run.app/input_file_8.png",
+    bgColor: "bg-rose-50",
+    icon: <Heart className="text-rose-400" size={48} />,
   },
 ];
 
@@ -211,8 +201,30 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setStory(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Reconstruct the story with icons and colors
+          const bgColors = ["bg-rose-50", "bg-emerald-50", "bg-yellow-50", "bg-orange-50", "bg-blue-50", "bg-sky-50", "bg-pink-50", "bg-green-50", "bg-indigo-50", "bg-rose-50"];
+          const icons = [
+            <Heart className="text-rose-400" size={48} />,
+            <Heart className="text-emerald-400" size={48} />,
+            <Stars className="text-yellow-400" size={48} />,
+            <Heart className="text-orange-400" size={48} />,
+            <Heart className="text-blue-400" size={48} />,
+            <Stars className="text-sky-400" size={48} />,
+            <Heart className="text-pink-400" size={48} />,
+            <Heart className="text-green-400" size={48} />,
+            <Moon className="text-indigo-400" size={48} />,
+            <Heart className="text-rose-400" size={48} />,
+          ];
+
+          const reconstructed = parsed.map((page: any, idx: number) => ({
+            ...page,
+            id: idx,
+            type: idx === 0 ? 'birthday' : (page.type || 'story'),
+            bgColor: bgColors[idx % bgColors.length],
+            icon: icons[idx % icons.length],
+          }));
+          setStory(reconstructed);
         }
       } catch (e) {
         console.error("Failed to load saved story", e);
@@ -220,8 +232,14 @@ export default function App() {
     }
   }, []);
 
-  const saveToLocalStorage = (newStory: any[]) => {
-    localStorage.setItem('douding_story', JSON.stringify(newStory));
+  const saveToLocalStorage = (newStory: typeof INITIAL_STORY) => {
+    // Only save serializable data
+    const serializable = newStory.map(p => ({ 
+      text: p.text, 
+      image: p.image,
+      type: p.type 
+    }));
+    localStorage.setItem('douding_story', JSON.stringify(serializable));
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus('idle'), 2000);
   };
@@ -273,17 +291,28 @@ export default function App() {
       const sentences = JSON.parse(response.text || "[]");
       if (Array.isArray(sentences) && sentences.length >= 9) {
         const bgColors = ["bg-emerald-50", "bg-yellow-50", "bg-orange-50", "bg-blue-50", "bg-sky-50", "bg-pink-50", "bg-green-50", "bg-indigo-50", "bg-rose-50"];
-        const iconNames = ["heart", "stars", "heart", "heart", "stars", "heart", "heart", "moon", "heart"];
-        const iconColors = ["text-emerald-400", "text-yellow-400", "text-orange-400", "text-blue-400", "text-sky-400", "text-pink-400", "text-green-400", "text-indigo-400", "text-rose-400"];
+        const icons = [
+          <Heart className="text-emerald-400" size={48} />,
+          <Stars className="text-yellow-400" size={48} />,
+          <Heart className="text-orange-400" size={48} />,
+          <Heart className="text-blue-400" size={48} />,
+          <Stars className="text-sky-400" size={48} />,
+          <Heart className="text-pink-400" size={48} />,
+          <Heart className="text-green-400" size={48} />,
+          <Moon className="text-indigo-400" size={48} />,
+          <Heart className="text-rose-400" size={48} />,
+        ];
 
-        const newStory = sentences.slice(0, 9).map((text, index) => ({
-          id: index + 1,
-          text,
-          image: `https://picsum.photos/seed/peace_garden_gen_${index}_${Date.now()}/800/600`,
-          bgColor: bgColors[index],
-          iconName: iconNames[index],
-          iconColor: iconColors[index],
-        }));
+        const newStory = [
+          INITIAL_STORY[0], // Keep the birthday page
+          ...sentences.slice(0, 9).map((text, index) => ({
+            id: index + 1,
+            text,
+            image: `https://picsum.photos/seed/peace_garden_gen_${index}_${Date.now()}/800/600`,
+            bgColor: bgColors[index],
+            icon: icons[index],
+          }))
+        ];
 
         setStory(newStory);
         setCurrentPage(0);
@@ -310,10 +339,16 @@ export default function App() {
     }
   };
 
+  const jumpToPage = (idx: number) => {
+    if (idx === currentPage) return;
+    setDirection(idx > currentPage ? 1 : -1);
+    setCurrentPage(idx);
+  };
+
   const page = story[currentPage];
 
   return (
-    <div className={`fixed inset-0 transition-colors duration-1000 ${page.bgColor} flex flex-col items-center justify-start md:justify-center p-4 md:p-8 pt-24 md:pt-8 overflow-y-auto md:overflow-hidden`}>
+    <div className={`fixed inset-0 transition-colors duration-1000 ${page.bgColor} flex flex-col items-center justify-center p-4 md:p-8`}>
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -322,13 +357,21 @@ export default function App() {
         onChange={handleFileChange} 
       />
 
+      {/* Background Decorative Elements */}
+      <div className="absolute top-10 left-10 opacity-20 animate-pulse">
+        <Stars size={100} />
+      </div>
+      <div className="absolute bottom-10 right-10 opacity-20 animate-bounce">
+        <Heart size={120} />
+      </div>
+
       {/* Top Bar */}
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-50 bg-gradient-to-b from-white/40 to-transparent backdrop-blur-[2px] md:bg-none md:backdrop-blur-none">
+      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
             <Heart className="text-pink-500" size={20} />
           </div>
-          <span className="font-serif text-lg font-medium hidden sm:inline">豆丁的和平花园</span>
+          <span className="font-serif text-lg font-medium">豆丁的和平花园</span>
         </div>
         <div className="flex gap-2">
           <button 
@@ -401,35 +444,45 @@ export default function App() {
             className="w-full"
           >
             {page.type === 'birthday' ? (
-              <div className="flex flex-col items-center justify-center text-center gap-4 py-4 mt-4 md:mt-0">
-                <BirthdayCake isBlownOut={isBlownOut} onBlowOut={() => setIsBlownOut(true)} />
+              <div className="flex flex-col items-center justify-center text-center gap-8 md:gap-12 py-8 md:py-12 w-full min-h-[70vh]">
+                <div className="relative transform hover:scale-105 transition-transform duration-500">
+                  <BirthdayCake isBlownOut={isBlownOut} onBlowOut={() => setIsBlownOut(true)} />
+                </div>
+                
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  className="space-y-3"
                 >
-                  <h1 className="text-xl md:text-2xl font-serif font-bold text-pink-600 mb-1">
+                  <h1 className="text-3xl md:text-5xl font-serif font-bold text-pink-600 tracking-tight">
                     祝豆丁女士1岁生日快乐！
                   </h1>
-                  <p className="text-base md:text-lg font-serif text-pink-400">
+                  <p className="text-lg md:text-xl font-serif text-pink-400 italic">
                     Happy 1st Birthday to Ms. Douding!
                   </p>
                 </motion.div>
                 
-                <div className="flex justify-center gap-4 mt-2">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1, duration: 0.5 }}
+                  className="flex justify-center mt-4"
+                >
                   <button
                     onClick={nextPage}
-                    className="px-5 py-1.5 bg-white hover:bg-pink-50 text-pink-600 rounded-full shadow-md font-serif font-medium transition-all flex items-center gap-2 text-xs md:text-sm"
+                    className="group px-10 py-4 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-xl font-serif font-medium transition-all flex items-center gap-3 text-xl hover:scale-105 active:scale-95"
                   >
-                    开始阅读故事 <ChevronRight size={16} />
+                    开始阅读故事 
+                    <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
                   </button>
-                </div>
+                </motion.div>
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 w-full mt-4 md:mt-0">
+              <div className="flex flex-col md:flex-row items-center gap-8 w-full aspect-[4/3] md:aspect-[16/9]">
                 {/* Image Section */}
                 <div 
-                  className={`w-full md:w-1/2 aspect-[4/3] relative group flex items-center justify-center ${isEditing ? 'cursor-pointer' : ''}`}
+                  className={`w-full md:w-1/2 h-full relative group flex items-center justify-center ${isEditing ? 'cursor-pointer' : ''}`}
                   onClick={handleImageClick}
                 >
                   <div className="absolute inset-0 bg-white/20 rounded-3xl -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
@@ -453,9 +506,6 @@ export default function App() {
 
                 {/* Text Section */}
                 <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left">
-                  <div className="flex justify-center md:justify-start mb-6">
-                    <StoryIcon name={page.iconName} colorClass={page.iconColor} />
-                  </div>
                   {isEditing ? (
                     <motion.textarea
                       initial={{ y: 10, opacity: 0 }}
@@ -510,17 +560,42 @@ export default function App() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="fixed bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+      <div className="absolute bottom-10 flex gap-2 items-center">
         {story.map((_, idx) => (
-          <div
+          <button
             key={idx}
-            className={`h-2 rounded-full transition-all duration-500 ${
+            onClick={() => jumpToPage(idx)}
+            className={`h-2 rounded-full transition-all duration-500 hover:scale-125 ${
               idx === currentPage ? 'w-8 bg-[#5d4037]' : 'w-2 bg-[#5d4037]/20'
             }`}
+            title={`跳转到第 ${idx + 1} 页`}
+          />
+        ))}
+        <span className="ml-4 text-xs font-serif text-[#5d4037]/60">
+          {currentPage + 1} / {story.length}
+        </span>
+      </div>
+
+      {/* Interactive Floating Bubbles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: "110%", x: `${Math.random() * 100}%` }}
+            animate={{ 
+              y: "-10%",
+              x: `${(Math.random() * 100) + (Math.sin(i) * 10)}%`
+            }}
+            transition={{ 
+              duration: 10 + Math.random() * 10, 
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 2
+            }}
+            className="absolute w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
           />
         ))}
       </div>
-
     </div>
   );
 }
